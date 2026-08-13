@@ -1,0 +1,10 @@
+<|pad|>
+<|startoftext|>
+<|endoftext|>
+<|im_start|>
+<|im_end|>
+<|fim_pre|>
+<|fim_mid|>
+<|fim_suf|>
+<think>
+</think>

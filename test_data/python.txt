@@ -1,0 +1,447 @@
+#!/usr/bin/env python3
+"""
+Roman Empire Battle Simulation Module
+
+This module provides classes and functions for simulating battles
+in the Roman Empire, including soldier types, formations, and combat mechanics.
+"""
+
+from dataclasses import dataclass, field
+from enum import Enum
+from typing import List, Optional, Tuple
+import random
+import math
+
+
+class SoldierRank(Enum):
+    """Military ranks in the Roman Legion."""
+    MILES = 1           # Common soldier
+    OPTIO = 2           # Second in command of century
+    CENTURION = 3       # Century commander
+    TRIBUNUS = 4        # Senior officer
+    LEGATUS = 5         # Legion commander
+
+
+class WeaponType(Enum):
+    """Types of weapons used by Roman soldiers."""
+    GLADIUS = "gladius"         # Short sword
+    PILUM = "pilum"             # Javelin
+    PUGIO = "pugio"             # Dagger
+    SPATHA = "spatha"           # Long sword (cavalry)
+    HASTA = "hasta"             # Spear
+
+
+class ArmorType(Enum):
+    """Types of armor worn by Roman soldiers."""
+    LORICA_SEGMENTATA = "lorica_segmentata"  # Segmented plate armor
+    LORICA_HAMATA = "lorica_hamata"          # Chain mail
+    LORICA_SQUAMATA = "lorica_squamata"      # Scale armor
+    NONE = "none"
+
+
+@dataclass
+class Equipment:
+    """Represents a soldier's equipment loadout."""
+    primary_weapon: WeaponType
+    secondary_weapon: Optional[WeaponType] = None
+    armor: ArmorType = ArmorType.NONE
+    has_shield: bool = True
+    has_helmet: bool = True
+
+    def calculate_defense_bonus(self) -> float:
+        """Calculate total defense bonus from equipment."""
+        armor_values = {
+            ArmorType.LORICA_SEGMENTATA: 0.35,
+            ArmorType.LORICA_HAMATA: 0.25,
+            ArmorType.LORICA_SQUAMATA: 0.20,
+            ArmorType.NONE: 0.0
+        }
+        defense = armor_values[self.armor]
+        if self.has_shield:
+            defense += 0.20
+        if self.has_helmet:
+            defense += 0.10
+        return defense
+
+    def calculate_attack_bonus(self) -> float:
+        """Calculate attack bonus from weapons."""
+        weapon_values = {
+            WeaponType.GLADIUS: 0.30,
+            WeaponType.PILUM: 0.25,
+            WeaponType.PUGIO: 0.15,
+            WeaponType.SPATHA: 0.35,
+            WeaponType.HASTA: 0.28
+        }
+        attack = weapon_values[self.primary_weapon]
+        if self.secondary_weapon:
+            attack += weapon_values[self.secondary_weapon] * 0.3
+        return attack
+
+
+@dataclass
+class RomanSoldier:
+    """
+    Represents a Roman soldier with combat capabilities.
+
+    Attributes:
+        name: Soldier's name
+        rank: Military rank
+        experience_years: Years of military service
+        health: Current health points (0-100)
+        morale: Current morale level (0-100)
+        equipment: Soldier's equipment loadout
+    """
+    name: str
+    rank: SoldierRank
+    experience_years: int
+    health: float = 100.0
+    morale: float = 80.0
+    equipment: Equipment = field(default_factory=lambda: Equipment(
+        primary_weapon=WeaponType.GLADIUS,
+        secondary_weapon=WeaponType.PILUM,
+        armor=ArmorType.LORICA_SEGMENTATA
+    ))
+    kills: int = 0
+    battles_fought: int = 0
+
+    @property
+    def is_alive(self) -> bool:
+        """Check if soldier is still alive."""
+        return self.health > 0
+
+    @property
+    def combat_effectiveness(self) -> float:
+        """
+        Calculate overall combat effectiveness based on multiple factors.
+        Returns a value between 0 and 1.
+        """
+        health_factor = self.health / 100.0
+        morale_factor = self.morale / 100.0
+        experience_factor = min(1.0, self.experience_years / 20.0)
+        rank_factor = self.rank.value / 5.0
+
+        equipment_attack = self.equipment.calculate_attack_bonus()
+        equipment_defense = self.equipment.calculate_defense_bonus()
+
+        effectiveness = (
+            health_factor * 0.25 +
+            morale_factor * 0.20 +
+            experience_factor * 0.20 +
+            rank_factor * 0.10 +
+            equipment_attack * 0.15 +
+            equipment_defense * 0.10
+        )
+        return min(1.0, effectiveness)
+
+    def attack(self, target: 'RomanSoldier') -> Tuple[float, bool]:
+        """
+        Perform an attack on another soldier.
+
+        Args:
+            target: The soldier being attacked
+
+        Returns:
+            Tuple of (damage_dealt, is_kill)
+        """
+        if not self.is_alive or not target.is_alive:
+            return 0.0, False
+
+        # Calculate hit chance based on attacker effectiveness vs defender
+        hit_chance = 0.5 + (self.combat_effectiveness - target.combat_effectiveness) * 0.3
+        hit_chance = max(0.1, min(0.9, hit_chance))
+
+        if random.random() > hit_chance:
+            return 0.0, False
+
+        # Calculate base damage
+        base_damage = 15 + random.uniform(5, 15)
+
+        # Apply attacker bonuses
+        attack_multiplier = 1.0 + self.equipment.calculate_attack_bonus()
+        attack_multiplier *= (1.0 + self.experience_years * 0.02)
+
+        # Apply defender defense
+        defense_reduction = target.equipment.calculate_defense_bonus()
+
+        damage = base_damage * attack_multiplier * (1.0 - defense_reduction)
+        target.health -= damage
+
+        is_kill = not target.is_alive
+        if is_kill:
+            self.kills += 1
+            self.morale = min(100, self.morale + 5)
+
+        return damage, is_kill
+
+    def receive_inspiration(self, bonus: float = 10.0) -> None:
+        """Boost morale from inspirational speech or victory."""
+        self.morale = min(100.0, self.morale + bonus)
+
+    def suffer_demoralization(self, penalty: float = 15.0) -> None:
+        """Reduce morale from defeat or seeing comrades fall."""
+        self.morale = max(0.0, self.morale - penalty)
+
+    def heal(self, amount: float) -> None:
+        """Recover health points."""
+        if self.is_alive:
+            self.health = min(100.0, self.health + amount)
+
+
+@dataclass
+class Century:
+    """
+    Represents a Roman century (unit of ~80 soldiers).
+    """
+    centurion: RomanSoldier
+    soldiers: List[RomanSoldier] = field(default_factory=list)
+
+    @property
+    def strength(self) -> int:
+        """Number of living soldiers including centurion."""
+        count = 1 if self.centurion.is_alive else 0
+        count += sum(1 for s in self.soldiers if s.is_alive)
+        return count
+
+    @property
+    def average_morale(self) -> float:
+        """Calculate average morale of the century."""
+        living = [s for s in self.soldiers + [self.centurion] if s.is_alive]
+        if not living:
+            return 0.0
+        return sum(s.morale for s in living) / len(living)
+
+    @property
+    def combat_power(self) -> float:
+        """Calculate total combat power of the century."""
+        living = [s for s in self.soldiers + [self.centurion] if s.is_alive]
+        return sum(s.combat_effectiveness for s in living)
+
+
+@dataclass
+class BattleResult:
+    """Results of a battle between two armies."""
+    winner: str
+    attacker_casualties: int
+    defender_casualties: int
+    attacker_initial: int
+    defender_initial: int
+    rounds_fought: int
+    decisive_victory: bool
+
+    @property
+    def attacker_casualty_rate(self) -> float:
+        return self.attacker_casualties / self.attacker_initial if self.attacker_initial > 0 else 0
+
+    @property
+    def defender_casualty_rate(self) -> float:
+        return self.defender_casualties / self.defender_initial if self.defender_initial > 0 else 0
+
+
+def create_standard_legionary(name: str, experience: int = 5) -> RomanSoldier:
+    """Factory function to create a standard Roman legionary."""
+    return RomanSoldier(
+        name=name,
+        rank=SoldierRank.MILES,
+        experience_years=experience,
+        equipment=Equipment(
+            primary_weapon=WeaponType.GLADIUS,
+            secondary_weapon=WeaponType.PILUM,
+            armor=ArmorType.LORICA_SEGMENTATA,
+            has_shield=True,
+            has_helmet=True
+        )
+    )
+
+
+def create_centurion(name: str, experience: int = 15) -> RomanSoldier:
+    """Factory function to create a Roman centurion."""
+    return RomanSoldier(
+        name=name,
+        rank=SoldierRank.CENTURION,
+        experience_years=experience,
+        morale=90.0,
+        equipment=Equipment(
+            primary_weapon=WeaponType.GLADIUS,
+            secondary_weapon=WeaponType.PUGIO,
+            armor=ArmorType.LORICA_SEGMENTATA,
+            has_shield=True,
+            has_helmet=True
+        )
+    )
+
+
+def create_century(century_number: int) -> Century:
+    """Create a full century with centurion and soldiers."""
+    centurion = create_centurion(f"Centurion_{century_number}")
+    soldiers = [
+        create_standard_legionary(f"Miles_{century_number}_{i}", experience=random.randint(1, 10))
+        for i in range(79)
+    ]
+    return Century(centurion=centurion, soldiers=soldiers)
+
+
+def compute_battle_outcome(
+    attackers: List[RomanSoldier],
+    defenders: List[RomanSoldier],
+    max_rounds: int = 100
+) -> BattleResult:
+    """
+    Simulate a battle between two groups of soldiers.
+
+    Args:
+        attackers: List of attacking soldiers
+        defenders: List of defending soldiers
+        max_rounds: Maximum number of combat rounds
+
+    Returns:
+        BattleResult containing battle statistics
+    """
+    initial_attackers = len(attackers)
+    initial_defenders = len(defenders)
+
+    attacker_casualties = 0
+    defender_casualties = 0
+    rounds = 0
+
+    for round_num in range(max_rounds):
+        rounds = round_num + 1
+
+        # Get living soldiers
+        living_attackers = [s for s in attackers if s.is_alive]
+        living_defenders = [s for s in defenders if s.is_alive]
+
+        if not living_attackers or not living_defenders:
+            break
+
+        # Check for rout (mass morale failure)
+        avg_attacker_morale = sum(s.morale for s in living_attackers) / len(living_attackers)
+        avg_defender_morale = sum(s.morale for s in living_defenders) / len(living_defenders)
+
+        if avg_attacker_morale < 20:
+            break
+        if avg_defender_morale < 20:
+            break
+
+        # Combat phase - each side attacks
+        for attacker in living_attackers[:]:
+            if not living_defenders:
+                break
+            target = random.choice(living_defenders)
+            damage, is_kill = attacker.attack(target)
+            if is_kill:
+                defender_casualties += 1
+                living_defenders.remove(target)
+                # Demoralize nearby defenders
+                for defender in living_defenders[:5]:
+                    defender.suffer_demoralization(5.0)
+
+        living_defenders = [s for s in defenders if s.is_alive]
+
+        for defender in living_defenders[:]:
+            if not living_attackers:
+                break
+            target = random.choice(living_attackers)
+            damage, is_kill = defender.attack(target)
+            if is_kill:
+                attacker_casualties += 1
+                living_attackers.remove(target)
+                for attacker in living_attackers[:5]:
+                    attacker.suffer_demoralization(5.0)
+
+    # Determine winner
+    surviving_attackers = sum(1 for s in attackers if s.is_alive)
+    surviving_defenders = sum(1 for s in defenders if s.is_alive)
+
+    if surviving_attackers > surviving_defenders:
+        winner = "Attackers"
+    elif surviving_defenders > surviving_attackers:
+        winner = "Defenders"
+    else:
+        winner = "Draw"
+
+    # Determine if it was a decisive victory
+    total_casualties = attacker_casualties + defender_casualties
+    total_initial = initial_attackers + initial_defenders
+    casualty_ratio = total_casualties / total_initial if total_initial > 0 else 0
+    decisive = casualty_ratio > 0.5 or surviving_attackers == 0 or surviving_defenders == 0
+
+    return BattleResult(
+        winner=winner,
+        attacker_casualties=attacker_casualties,
+        defender_casualties=defender_casualties,
+        attacker_initial=initial_attackers,
+        defender_initial=initial_defenders,
+        rounds_fought=rounds,
+        decisive_victory=decisive
+    )
+
+
+def simulate_legion_battle(
+    attacking_centuries: List[Century],
+    defending_centuries: List[Century]
+) -> BattleResult:
+    """
+    Simulate a larger battle between multiple centuries.
+    """
+    attackers = []
+    for century in attacking_centuries:
+        attackers.append(century.centurion)
+        attackers.extend(century.soldiers)
+
+    defenders = []
+    for century in defending_centuries:
+        defenders.append(century.centurion)
+        defenders.extend(century.soldiers)
+
+    return compute_battle_outcome(attackers, defenders)
+
+
+def main():
+    """Run a sample battle simulation."""
+    print("=" * 60)
+    print("ROMAN EMPIRE BATTLE SIMULATION")
+    print("=" * 60)
+
+    # Create two centuries for battle
+    print("\nCreating Roman centuries...")
+    century_1 = create_century(1)
+    century_2 = create_century(2)
+
+    print(f"Century I: {century_1.strength} soldiers, combat power: {century_1.combat_power:.2f}")
+    print(f"Century II: {century_2.strength} soldiers, combat power: {century_2.combat_power:.2f}")
+
+    # Run battle simulation
+    print("\n" + "-" * 60)
+    print("BATTLE COMMENCES!")
+    print("-" * 60)
+
+    result = simulate_legion_battle([century_1], [century_2])
+
+    print(f"\nBattle concluded after {result.rounds_fought} rounds")
+    print(f"Winner: {result.winner}")
+    print(f"\nCasualties:")
+    print(f"  Attackers: {result.attacker_casualties}/{result.attacker_initial} ({result.attacker_casualty_rate:.1%})")
+    print(f"  Defenders: {result.defender_casualties}/{result.defender_initial} ({result.defender_casualty_rate:.1%})")
+    print(f"\nDecisive victory: {'Yes' if result.decisive_victory else 'No'}")
+
+    # Show surviving soldiers stats
+    print("\n" + "=" * 60)
+    print("POST-BATTLE ANALYSIS")
+    print("=" * 60)
+
+    surviving_1 = [s for s in [century_1.centurion] + century_1.soldiers if s.is_alive]
+    surviving_2 = [s for s in [century_2.centurion] + century_2.soldiers if s.is_alive]
+
+    print(f"\nCentury I survivors: {len(surviving_1)}")
+    if surviving_1:
+        top_killer = max(surviving_1, key=lambda s: s.kills)
+        print(f"  Top performer: {top_killer.name} with {top_killer.kills} kills")
+
+    print(f"\nCentury II survivors: {len(surviving_2)}")
+    if surviving_2:
+        top_killer = max(surviving_2, key=lambda s: s.kills)
+        print(f"  Top performer: {top_killer.name} with {top_killer.kills} kills")
+
+
+if __name__ == "__main__":
+    main()

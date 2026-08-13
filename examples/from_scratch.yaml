@@ -1,0 +1,42 @@
+# Minimal from-scratch training run.
+#
+#   cargo build --release
+#   ./target/release/toktoktok -c examples/from_scratch.yaml
+#
+# Trains 2,000 merges on the sample corpus in test_data/, producing a vocabulary of
+#   256 base bytes + 1,161 hardcoded merges + 2,000 trained merges + 10 special tokens = 3,427
+#
+# Verify the result with:
+#   python scripts/test_tokenizer.py tokenizer.tiktoken examples/special_tokens.txt
+
+output: ./tokenizer.tiktoken
+
+# Cap on how much training data is held in memory. Anything beyond this is
+# reservoir-sampled, so the sample stays representative of the whole corpus.
+working_set_mb: 1024
+
+# -1 uses every available core.
+threads: -1
+
+verbose: true
+
+# Appended at the end of the vocabulary, after all trained merges. They are not written
+# into the .tiktoken file — pass the same list when loading (see examples/special_tokens.txt).
+special_tokens:
+  - "<|pad|>"
+  - "<|startoftext|>"
+  - "<|endoftext|>"
+  - "<|im_start|>"
+  - "<|im_end|>"
+  - "<|fim_pre|>"
+  - "<|fim_mid|>"
+  - "<|fim_suf|>"
+  - "<think>"
+  - "</think>"
+
+phases:
+  - name: "Sample corpus"
+    merges: 2000
+    sources:
+      # A directory is scanned recursively for .txt and .parquet files.
+      - path: ./test_data

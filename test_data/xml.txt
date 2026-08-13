@@ -1,0 +1,285 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<roman_empire xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <metadata>
+    <title>The Roman Empire Historical Database</title>
+    <version>1.0</version>
+    <last_updated>2024-01-15</last_updated>
+    <author>Historical Archives</author>
+  </metadata>
+
+  <overview>
+    <name lang="en">Roman Empire</name>
+    <name lang="la">Imperium Romanum</name>
+    <founding_date format="BCE">753</founding_date>
+    <fall_of_western_empire format="CE">476</fall_of_western_empire>
+    <fall_of_eastern_empire format="CE">1453</fall_of_eastern_empire>
+    <peak_statistics>
+      <population unit="people">70000000</population>
+      <area unit="km2">5000000</area>
+      <peak_year format="CE">117</peak_year>
+    </peak_statistics>
+  </overview>
+
+  <periods>
+    <period id="kingdom">
+      <name>Roman Kingdom</name>
+      <date_range>
+        <start year="-753"/>
+        <end year="-509"/>
+      </date_range>
+      <rulers>
+        <ruler order="1">
+          <name>Romulus</name>
+          <reign_years>37</reign_years>
+          <notable_achievements>
+            <achievement>Founded the city of Rome</achievement>
+            <achievement>Established the Roman Senate</achievement>
+          </notable_achievements>
+        </ruler>
+        <ruler order="7">
+          <name>Tarquinius Superbus</name>
+          <reign_years>25</reign_years>
+          <notable_achievements>
+            <achievement>Last King of Rome</achievement>
+            <achievement>Completed Temple of Jupiter</achievement>
+          </notable_achievements>
+        </ruler>
+      </rulers>
+    </period>
+
+    <period id="republic">
+      <name>Roman Republic</name>
+      <date_range>
+        <start year="-509"/>
+        <end year="-27"/>
+      </date_range>
+      <key_events>
+        <event year="-264">
+          <title>First Punic War begins</title>
+          <description>Rome's first major overseas conflict against Carthage</description>
+          <outcome>Roman victory, gained Sicily</outcome>
+        </event>
+        <event year="-218">
+          <title>Second Punic War</title>
+          <description>Hannibal's invasion of Italy</description>
+          <notable_battles>
+            <battle name="Cannae" year="-216" result="Carthaginian victory"/>
+            <battle name="Zama" year="-202" result="Roman victory"/>
+          </notable_battles>
+        </event>
+        <event year="-44">
+          <title>Assassination of Julius Caesar</title>
+          <description>Dictator Julius Caesar killed by senators</description>
+          <conspirators count="60">
+            <leader>Marcus Brutus</leader>
+            <leader>Gaius Cassius</leader>
+          </conspirators>
+        </event>
+      </key_events>
+    </period>
+
+    <period id="principate">
+      <name>Principate</name>
+      <date_range>
+        <start year="-27"/>
+        <end year="284"/>
+      </date_range>
+      <dynasties>
+        <dynasty name="Julio-Claudian">
+          <emperors>
+            <emperor>
+              <name>Augustus</name>
+              <birth_name>Gaius Octavius</birth_name>
+              <reign start="-27" end="14"/>
+              <titles>
+                <title>Princeps</title>
+                <title>Imperator</title>
+                <title>Pater Patriae</title>
+              </titles>
+              <achievements>
+                <achievement category="political">Established the Principate</achievement>
+                <achievement category="military">Secured borders</achievement>
+                <achievement category="cultural">Augustan Golden Age of literature</achievement>
+              </achievements>
+            </emperor>
+            <emperor>
+              <name>Tiberius</name>
+              <reign start="14" end="37"/>
+            </emperor>
+            <emperor>
+              <name>Caligula</name>
+              <reign start="37" end="41"/>
+              <death_cause>Assassination</death_cause>
+            </emperor>
+            <emperor>
+              <name>Claudius</name>
+              <reign start="41" end="54"/>
+              <achievements>
+                <achievement category="military">Conquest of Britain</achievement>
+              </achievements>
+            </emperor>
+            <emperor>
+              <name>Nero</name>
+              <reign start="54" end="68"/>
+              <death_cause>Suicide</death_cause>
+            </emperor>
+          </emperors>
+        </dynasty>
+
+        <dynasty name="Five Good Emperors">
+          <description>Period of prosperity and good governance</description>
+          <emperors>
+            <emperor>
+              <name>Nerva</name>
+              <reign start="96" end="98"/>
+            </emperor>
+            <emperor>
+              <name>Trajan</name>
+              <reign start="98" end="117"/>
+              <achievements>
+                <achievement category="military">Maximum territorial extent</achievement>
+                <achievement category="construction">Trajan's Forum and Column</achievement>
+              </achievements>
+            </emperor>
+            <emperor>
+              <name>Hadrian</name>
+              <reign start="117" end="138"/>
+              <achievements>
+                <achievement category="construction">Hadrian's Wall</achievement>
+                <achievement category="construction">Rebuilt Pantheon</achievement>
+              </achievements>
+            </emperor>
+            <emperor>
+              <name>Antoninus Pius</name>
+              <reign start="138" end="161"/>
+            </emperor>
+            <emperor>
+              <name>Marcus Aurelius</name>
+              <reign start="161" end="180"/>
+              <titles>
+                <title>Philosopher King</title>
+              </titles>
+              <works>
+                <work type="philosophy">Meditations</work>
+              </works>
+            </emperor>
+          </emperors>
+        </dynasty>
+      </dynasties>
+    </period>
+  </periods>
+
+  <military>
+    <legion_structure>
+      <unit name="Legion" strength="5000">
+        <subunit name="Cohort" count="10" strength="480"/>
+        <subunit name="Century" count="60" strength="80"/>
+        <subunit name="Contubernium" count="600" strength="8"/>
+      </unit>
+    </legion_structure>
+
+    <equipment>
+      <weapon id="gladius">
+        <name>Gladius</name>
+        <type>Short sword</type>
+        <length unit="cm">60-68</length>
+        <usage>Close combat stabbing</usage>
+      </weapon>
+      <weapon id="pilum">
+        <name>Pilum</name>
+        <type>Javelin</type>
+        <length unit="cm">200</length>
+        <usage>Thrown before melee engagement</usage>
+        <special_feature>Soft iron shank bends on impact</special_feature>
+      </weapon>
+      <armor id="lorica_segmentata">
+        <name>Lorica Segmentata</name>
+        <type>Segmented plate armor</type>
+        <material>Iron</material>
+        <period>1st-3rd century CE</period>
+      </armor>
+      <shield id="scutum">
+        <name>Scutum</name>
+        <shape>Rectangular curved</shape>
+        <dimensions>
+          <height unit="cm">100</height>
+          <width unit="cm">60</width>
+        </dimensions>
+      </shield>
+    </equipment>
+  </military>
+
+  <infrastructure>
+    <roads total_length_km="400000">
+      <road id="via_appia">
+        <name>Via Appia</name>
+        <nickname>Queen of Roads</nickname>
+        <route from="Rome" to="Brindisi"/>
+        <length unit="km">540</length>
+        <built_year format="BCE">312</built_year>
+        <builder>Appius Claudius Caecus</builder>
+      </road>
+      <road id="via_flaminia">
+        <name>Via Flaminia</name>
+        <route from="Rome" to="Rimini"/>
+        <length unit="km">320</length>
+        <built_year format="BCE">220</built_year>
+      </road>
+    </roads>
+
+    <aqueducts city="Rome" count="11" daily_water_liters="1000000000">
+      <aqueduct>
+        <name>Aqua Appia</name>
+        <built_year format="BCE">312</built_year>
+        <length unit="km">16</length>
+      </aqueduct>
+      <aqueduct>
+        <name>Aqua Marcia</name>
+        <built_year format="BCE">144</built_year>
+        <length unit="km">91</length>
+        <water_quality>Excellent - drinking water</water_quality>
+      </aqueduct>
+    </aqueducts>
+
+    <monuments>
+      <monument type="amphitheater">
+        <name>Colosseum</name>
+        <official_name>Flavian Amphitheater</official_name>
+        <built_year format="CE">80</built_year>
+        <capacity>50000</capacity>
+        <dimensions>
+          <length unit="m">189</length>
+          <width unit="m">156</width>
+          <height unit="m">48</height>
+        </dimensions>
+      </monument>
+      <monument type="temple">
+        <name>Pantheon</name>
+        <built_year format="CE">125</built_year>
+        <dome_diameter unit="m">43.3</dome_diameter>
+        <oculus_diameter unit="m">8.2</oculus_diameter>
+        <current_use>Church of Santa Maria ad Martyres</current_use>
+      </monument>
+    </monuments>
+  </infrastructure>
+
+  <provinces count="45">
+    <province id="italia" status="homeland">
+      <name>Italia</name>
+      <capital>Rome</capital>
+      <special_status>Not a province - the homeland</special_status>
+    </province>
+    <province id="aegyptus" status="imperial">
+      <name>Aegyptus</name>
+      <capital>Alexandria</capital>
+      <importance>Grain supply for Rome</importance>
+      <annexed_year format="BCE">30</annexed_year>
+    </province>
+    <province id="britannia" status="imperial">
+      <name>Britannia</name>
+      <capital>Londinium</capital>
+      <conquered_year format="CE">43</conquered_year>
+      <abandoned_year format="CE">410</abandoned_year>
+    </province>
+  </provinces>
+</roman_empire>

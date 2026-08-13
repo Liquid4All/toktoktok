@@ -1,0 +1,55 @@
+# Multi-phase training.
+#
+#   ./target/release/toktoktok -c examples/multi_phase.yaml
+#
+# Phases run sequentially and share one merge history: every phase starts from the
+# vocabulary the previous phase ended with. Splitting the run this way is how you
+# control the vocabulary budget per domain — otherwise whichever corpus is largest
+# dominates the merge table.
+#
+# Total vocab = 256 base bytes + 1,161 hardcoded merges + sum(phase merges) + special tokens
+
+output: ./tokenizer.tiktoken
+
+working_set_mb: 8192
+threads: -1
+verbose: true
+
+special_tokens:
+  - "<|pad|>"
+  - "<|startoftext|>"
+  - "<|endoftext|>"
+  # Fill-in-the-middle
+  - "<|fim_pre|>"
+  - "<|fim_mid|>"
+  - "<|fim_suf|>"
+  # Chat
+  - "<|im_start|>"
+  - "<|im_end|>"
+  # Reasoning
+  - "<think>"
+  - "</think>"
+
+phases:
+  # Phase 1: general English text gets the largest share.
+  - name: "English"
+    merges: 30000
+    sources:
+      - path: /data/corpus/english/wikipedia
+      - path: /data/corpus/english/books
+      # A single file works too. Parquet files must have a "text" column.
+      - file: /data/corpus/english/common_crawl.parquet
+
+  # Phase 2: code, kept separate so it gets a guaranteed budget.
+  - name: "Code"
+    merges: 15000
+    sources:
+      - path: /data/corpus/code
+
+  # Phase 3: other languages.
+  - name: "Multilingual"
+    merges: 5000
+    sources:
+      - path: /data/corpus/german
+      - path: /data/corpus/french
+      - path: /data/corpus/spanish

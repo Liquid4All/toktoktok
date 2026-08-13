@@ -1,0 +1,165 @@
+{
+  "roman_empire": {
+    "overview": {
+      "name": "Roman Empire",
+      "latin_name": "Imperium Romanum",
+      "founding_date": "753 BCE",
+      "fall_of_west": "476 CE",
+      "fall_of_east": "1453 CE",
+      "peak_population": 70000000,
+      "peak_area_km2": 5000000
+    },
+    "periods": [
+      {
+        "name": "Roman Kingdom",
+        "start_year": -753,
+        "end_year": -509,
+        "duration_years": 244,
+        "notable_rulers": ["Romulus", "Numa Pompilius", "Tarquinius Superbus"],
+        "key_events": [
+          {"year": -753, "event": "Legendary founding of Rome by Romulus"},
+          {"year": -509, "event": "Overthrow of the last king, establishment of Republic"}
+        ]
+      },
+      {
+        "name": "Roman Republic",
+        "start_year": -509,
+        "end_year": -27,
+        "duration_years": 482,
+        "notable_figures": [
+          {"name": "Julius Caesar", "role": "Dictator", "death_year": -44},
+          {"name": "Cicero", "role": "Orator and Statesman", "death_year": -43},
+          {"name": "Pompey", "role": "General", "death_year": -48}
+        ],
+        "key_events": [
+          {"year": -264, "event": "First Punic War begins"},
+          {"year": -146, "event": "Destruction of Carthage"},
+          {"year": -44, "event": "Assassination of Julius Caesar"}
+        ]
+      },
+      {
+        "name": "Principate",
+        "start_year": -27,
+        "end_year": 284,
+        "duration_years": 311,
+        "emperors": {
+          "julio_claudian": [
+            {"name": "Augustus", "reign_start": -27, "reign_end": 14, "achievements": ["Pax Romana", "Administrative reforms"]},
+            {"name": "Tiberius", "reign_start": 14, "reign_end": 37, "achievements": ["Consolidation of power"]},
+            {"name": "Caligula", "reign_start": 37, "reign_end": 41, "achievements": []},
+            {"name": "Claudius", "reign_start": 41, "reign_end": 54, "achievements": ["Conquest of Britain"]},
+            {"name": "Nero", "reign_start": 54, "reign_end": 68, "achievements": []}
+          ],
+          "five_good_emperors": [
+            {"name": "Nerva", "reign_start": 96, "reign_end": 98},
+            {"name": "Trajan", "reign_start": 98, "reign_end": 117, "achievements": ["Maximum territorial extent", "Trajan's Column"]},
+            {"name": "Hadrian", "reign_start": 117, "reign_end": 138, "achievements": ["Hadrian's Wall", "Pantheon reconstruction"]},
+            {"name": "Antoninus Pius", "reign_start": 138, "reign_end": 161},
+            {"name": "Marcus Aurelius", "reign_start": 161, "reign_end": 180, "achievements": ["Meditations", "Philosopher king"]}
+          ]
+        }
+      },
+      {
+        "name": "Crisis of the Third Century",
+        "start_year": 235,
+        "end_year": 284,
+        "duration_years": 49,
+        "characteristics": ["Military anarchy", "Economic collapse", "Plague", "Barbarian invasions"],
+        "statistics": {
+          "number_of_emperors": 50,
+          "average_reign_years": 0.98
+        }
+      },
+      {
+        "name": "Dominate",
+        "start_year": 284,
+        "end_year": 476,
+        "duration_years": 192,
+        "key_emperors": [
+          {
+            "name": "Diocletian",
+            "reign_start": 284,
+            "reign_end": 305,
+            "reforms": [
+              {"name": "Tetrarchy", "description": "Division of empire into four administrative units"},
+              {"name": "Price Edict", "description": "Attempt to control inflation"},
+              {"name": "Military reorganization", "description": "Separation of civil and military authority"}
+            ]
+          },
+          {
+            "name": "Constantine I",
+            "reign_start": 306,
+            "reign_end": 337,
+            "reforms": [
+              {"name": "Edict of Milan", "year": 313, "description": "Legalization of Christianity"},
+              {"name": "Constantinople", "year": 330, "description": "Foundation of new eastern capital"},
+              {"name": "Council of Nicaea", "year": 325, "description": "First ecumenical council"}
+            ]
+          }
+        ]
+      }
+    ],
+    "military": {
+      "legion": {
+        "full_strength": 5000,
+        "composition": {
+          "centuries": 60,
+          "cohorts": 10,
+          "soldiers_per_century": 80
+        },
+        "ranks": [
+          {"name": "Legatus", "role": "Legion commander", "social_class": "Senatorial"},
+          {"name": "Tribunus", "role": "Senior officer", "social_class": "Equestrian"},
+          {"name": "Centurion", "role": "Century commander", "social_class": "Professional soldier"},
+          {"name": "Optio", "role": "Second in command of century", "social_class": "Professional soldier"},
+          {"name": "Miles", "role": "Common soldier", "social_class": "Citizen"}
+        ]
+      },
+      "equipment": [
+        {"name": "Gladius", "type": "sword", "length_cm": 60, "usage": "Stabbing in close combat"},
+        {"name": "Pilum", "type": "javelin", "length_cm": 200, "usage": "Thrown before melee engagement"},
+        {"name": "Scutum", "type": "shield", "shape": "rectangular curved", "usage": "Formation defense"},
+        {"name": "Lorica Segmentata", "type": "armor", "material": "iron plates", "usage": "Body protection"}
+      ],
+      "famous_battles": [
+        {"name": "Battle of Cannae", "year": -216, "opponent": "Carthage", "result": "Defeat", "casualties": 70000},
+        {"name": "Battle of Zama", "year": -202, "opponent": "Carthage", "result": "Victory", "significance": "End of Second Punic War"},
+        {"name": "Battle of Actium", "year": -31, "opponent": "Egypt", "result": "Victory", "significance": "End of Republic"},
+        {"name": "Battle of Adrianople", "year": 378, "opponent": "Visigoths", "result": "Defeat", "casualties": 20000}
+      ]
+    },
+    "infrastructure": {
+      "roads": {
+        "total_length_km": 400000,
+        "major_roads": [
+          {"name": "Via Appia", "from": "Rome", "to": "Brindisi", "length_km": 540, "built_year": -312},
+          {"name": "Via Flaminia", "from": "Rome", "to": "Rimini", "length_km": 320, "built_year": -220},
+          {"name": "Via Aurelia", "from": "Rome", "to": "Arles", "length_km": 700, "built_year": -241}
+        ]
+      },
+      "aqueducts": {
+        "rome_total": 11,
+        "daily_water_liters": 1000000000,
+        "notable": [
+          {"name": "Aqua Appia", "built_year": -312, "length_km": 16},
+          {"name": "Aqua Marcia", "built_year": -144, "length_km": 91},
+          {"name": "Aqua Claudia", "built_year": 52, "length_km": 69}
+        ]
+      },
+      "monuments": [
+        {"name": "Colosseum", "built_year": 80, "capacity": 50000, "purpose": "Entertainment"},
+        {"name": "Pantheon", "built_year": 125, "dome_diameter_m": 43.3, "purpose": "Temple"},
+        {"name": "Trajan's Column", "built_year": 113, "height_m": 30, "purpose": "Commemorative"}
+      ]
+    },
+    "provinces": [
+      {"name": "Italia", "capital": "Rome", "status": "Homeland"},
+      {"name": "Hispania", "capital": "Tarraco", "status": "Senatorial/Imperial"},
+      {"name": "Gallia", "capital": "Lugdunum", "status": "Imperial"},
+      {"name": "Britannia", "capital": "Londinium", "status": "Imperial"},
+      {"name": "Aegyptus", "capital": "Alexandria", "status": "Imperial"},
+      {"name": "Syria", "capital": "Antioch", "status": "Imperial"},
+      {"name": "Africa Proconsularis", "capital": "Carthage", "status": "Senatorial"}
+    ]
+  }
+}

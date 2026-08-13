@@ -1,0 +1,486 @@
+/**
+ * Roman Empire Management System
+ * A TypeScript implementation for managing historical data about the Roman Empire
+ */
+
+// Enums for type safety
+enum EmperorDynasty {
+  JulioClaudian = "Julio-Claudian",
+  Flavian = "Flavian",
+  Nervan = "Nervan-Antonine",
+  Severan = "Severan",
+  Constantinian = "Constantinian",
+}
+
+enum MilitaryRank {
+  Miles = 1,
+  Optio = 2,
+  Centurion = 3,
+  Tribunus = 4,
+  Legatus = 5,
+}
+
+enum ProvinceStatus {
+  Senatorial = "senatorial",
+  Imperial = "imperial",
+  Client = "client",
+}
+
+// Interfaces
+interface DateRange {
+  start: number; // Negative for BCE
+  end: number;
+}
+
+interface Achievement {
+  category: "military" | "political" | "cultural" | "construction";
+  description: string;
+  year?: number;
+}
+
+interface Emperor {
+  name: string;
+  birthName?: string;
+  dynasty: EmperorDynasty;
+  reign: DateRange;
+  achievements: Achievement[];
+  deathCause?: string;
+  successor?: string;
+}
+
+interface Legion {
+  name: string;
+  number: number;
+  cognomen: string;
+  foundedYear: number;
+  disbandedYear?: number;
+  baseProvince: string;
+  strength: number;
+}
+
+interface Province {
+  name: string;
+  latinName: string;
+  capital: string;
+  status: ProvinceStatus;
+  annexedYear: number;
+  population?: number;
+  governor?: string;
+}
+
+interface Battle {
+  name: string;
+  year: number;
+  location: string;
+  romanCommander: string;
+  enemyCommander: string;
+  romanForces: number;
+  enemyForces: number;
+  result: "victory" | "defeat" | "draw";
+  casualties: {
+    roman: number;
+    enemy: number;
+  };
+}
+
+// Type aliases
+type Year = number;
+type Population = number;
+type AreaKm2 = number;
+
+// Classes
+class RomanEmperor implements Emperor {
+  public achievements: Achievement[] = [];
+
+  constructor(
+    public name: string,
+    public dynasty: EmperorDynasty,
+    public reign: DateRange,
+    public birthName?: string,
+    public deathCause?: string
+  ) {}
+
+  addAchievement(achievement: Achievement): void {
+    this.achievements.push(achievement);
+  }
+
+  getReignDuration(): number {
+    return this.reign.end - this.reign.start;
+  }
+
+  isReigningIn(year: Year): boolean {
+    return year >= this.reign.start && year <= this.reign.end;
+  }
+
+  toString(): string {
+    const duration = this.getReignDuration();
+    return `Emperor ${this.name} (${this.reign.start} - ${this.reign.end}, ${duration} years)`;
+  }
+}
+
+class RomanLegion implements Legion {
+  private casualties: number = 0;
+  private battlesWon: number = 0;
+  private battlesLost: number = 0;
+
+  constructor(
+    public name: string,
+    public number: number,
+    public cognomen: string,
+    public foundedYear: number,
+    public baseProvince: string,
+    public strength: number = 5000,
+    public disbandedYear?: number
+  ) {}
+
+  getFullName(): string {
+    return `Legio ${this.toRomanNumeral(this.number)} ${this.cognomen}`;
+  }
+
+  private toRomanNumeral(num: number): string {
+    const romanNumerals: [number, string][] = [
+      [1000, "M"], [900, "CM"], [500, "D"], [400, "CD"],
+      [100, "C"], [90, "XC"], [50, "L"], [40, "XL"],
+      [10, "X"], [9, "IX"], [5, "V"], [4, "IV"], [1, "I"],
+    ];
+
+    let result = "";
+    for (const [value, symbol] of romanNumerals) {
+      while (num >= value) {
+        result += symbol;
+        num -= value;
+      }
+    }
+    return result;
+  }
+
+  recordBattle(victory: boolean, casualties: number): void {
+    this.casualties += casualties;
+    if (victory) {
+      this.battlesWon++;
+    } else {
+      this.battlesLost++;
+    }
+  }
+
+  getEffectiveStrength(): number {
+    return Math.max(0, this.strength - this.casualties);
+  }
+
+  reinforce(soldiers: number): void {
+    this.casualties = Math.max(0, this.casualties - soldiers);
+  }
+
+  isActive(year: Year): boolean {
+    if (year < this.foundedYear) return false;
+    if (this.disbandedYear && year > this.disbandedYear) return false;
+    return true;
+  }
+
+  getStatistics(): { wins: number; losses: number; winRate: number } {
+    const total = this.battlesWon + this.battlesLost;
+    return {
+      wins: this.battlesWon,
+      losses: this.battlesLost,
+      winRate: total > 0 ? this.battlesWon / total : 0,
+    };
+  }
+}
+
+class RomanProvince implements Province {
+  private taxRevenue: number = 0;
+  private legionsStationed: RomanLegion[] = [];
+
+  constructor(
+    public name: string,
+    public latinName: string,
+    public capital: string,
+    public status: ProvinceStatus,
+    public annexedYear: number,
+    public population?: number,
+    public governor?: string
+  ) {}
+
+  stationLegion(legion: RomanLegion): void {
+    this.legionsStationed.push(legion);
+    legion.baseProvince = this.name;
+  }
+
+  removeLegion(legionName: string): RomanLegion | undefined {
+    const index = this.legionsStationed.findIndex((l) => l.name === legionName);
+    if (index !== -1) {
+      return this.legionsStationed.splice(index, 1)[0];
+    }
+    return undefined;
+  }
+
+  getMilitaryStrength(): number {
+    return this.legionsStationed.reduce(
+      (total, legion) => total + legion.getEffectiveStrength(),
+      0
+    );
+  }
+
+  calculateTax(ratePerCapita: number): number {
+    if (this.population) {
+      this.taxRevenue = this.population * ratePerCapita;
+    }
+    return this.taxRevenue;
+  }
+
+  getDescription(): string {
+    return `Province of ${this.name} (${this.latinName}), capital: ${this.capital}, ` +
+           `status: ${this.status}, annexed: ${Math.abs(this.annexedYear)} ${this.annexedYear < 0 ? "BCE" : "CE"}`;
+  }
+}
+
+// Battle simulator
+class BattleSimulator {
+  static simulateBattle(
+    romanLegions: RomanLegion[],
+    enemyStrength: number,
+    terrain: "plains" | "hills" | "forest" | "urban" = "plains"
+  ): Battle & { detailed: boolean } {
+    const romanStrength = romanLegions.reduce(
+      (sum, l) => sum + l.getEffectiveStrength(),
+      0
+    );
+
+    // Terrain modifiers for Romans
+    const terrainModifiers: Record<string, number> = {
+      plains: 1.2,  // Romans excel in open terrain
+      hills: 1.0,
+      forest: 0.8,  // Disadvantage in forests
+      urban: 1.1,
+    };
+
+    const modifier = terrainModifiers[terrain];
+    const effectiveRomanStrength = romanStrength * modifier;
+
+    // Calculate outcome
+    const romanAdvantage = effectiveRomanStrength / enemyStrength;
+    const isVictory = romanAdvantage > 0.8 && Math.random() < romanAdvantage / 2;
+
+    // Calculate casualties
+    const baseCasualtyRate = isVictory ? 0.1 : 0.3;
+    const romanCasualties = Math.floor(romanStrength * baseCasualtyRate * Math.random());
+    const enemyCasualties = Math.floor(
+      enemyStrength * (isVictory ? 0.4 : 0.15) * Math.random()
+    );
+
+    // Record battle results
+    romanLegions.forEach((legion) => {
+      const legionCasualties = Math.floor(
+        romanCasualties * (legion.getEffectiveStrength() / romanStrength)
+      );
+      legion.recordBattle(isVictory, legionCasualties);
+    });
+
+    return {
+      name: "Simulated Battle",
+      year: 0,
+      location: "Unknown",
+      romanCommander: "Unknown",
+      enemyCommander: "Unknown",
+      romanForces: romanStrength,
+      enemyForces: enemyStrength,
+      result: isVictory ? "victory" : "defeat",
+      casualties: {
+        roman: romanCasualties,
+        enemy: enemyCasualties,
+      },
+      detailed: true,
+    };
+  }
+}
+
+// Empire management class
+class RomanEmpire {
+  private emperors: RomanEmperor[] = [];
+  private provinces: Map<string, RomanProvince> = new Map();
+  private legions: Map<string, RomanLegion> = new Map();
+
+  constructor(
+    public foundingYear: Year = -753,
+    public currentYear: Year = 117
+  ) {}
+
+  addEmperor(emperor: RomanEmperor): void {
+    this.emperors.push(emperor);
+  }
+
+  getCurrentEmperor(): RomanEmperor | undefined {
+    return this.emperors.find((e) => e.isReigningIn(this.currentYear));
+  }
+
+  addProvince(province: RomanProvince): void {
+    this.provinces.set(province.name, province);
+  }
+
+  getProvince(name: string): RomanProvince | undefined {
+    return this.provinces.get(name);
+  }
+
+  addLegion(legion: RomanLegion): void {
+    this.legions.set(legion.getFullName(), legion);
+  }
+
+  getTotalMilitaryStrength(): number {
+    let total = 0;
+    this.legions.forEach((legion) => {
+      if (legion.isActive(this.currentYear)) {
+        total += legion.getEffectiveStrength();
+      }
+    });
+    return total;
+  }
+
+  getTotalPopulation(): Population {
+    let total = 0;
+    this.provinces.forEach((province) => {
+      if (province.population) {
+        total += province.population;
+      }
+    });
+    return total;
+  }
+
+  getActiveProvinces(): RomanProvince[] {
+    return Array.from(this.provinces.values()).filter(
+      (p) => p.annexedYear <= this.currentYear
+    );
+  }
+
+  generateReport(): string {
+    const emperor = this.getCurrentEmperor();
+    const population = this.getTotalPopulation();
+    const military = this.getTotalMilitaryStrength();
+    const provinceCount = this.getActiveProvinces().length;
+
+    return `
+=== Roman Empire Status Report (Year ${this.currentYear}) ===
+Emperor: ${emperor?.name ?? "Interregnum"}
+Population: ${population.toLocaleString()}
+Military Strength: ${military.toLocaleString()} soldiers
+Provinces: ${provinceCount}
+    `.trim();
+  }
+}
+
+// Utility functions
+function formatYear(year: Year): string {
+  if (year < 0) {
+    return `${Math.abs(year)} BCE`;
+  }
+  return `${year} CE`;
+}
+
+function calculateReignLength(emperors: RomanEmperor[]): Map<string, number> {
+  const lengths = new Map<string, number>();
+  emperors.forEach((e) => {
+    lengths.set(e.name, e.getReignDuration());
+  });
+  return lengths;
+}
+
+// Example usage and demonstration
+function main(): void {
+  console.log("=".repeat(60));
+  console.log("ROMAN EMPIRE MANAGEMENT SYSTEM");
+  console.log("=".repeat(60));
+
+  // Create the empire
+  const empire = new RomanEmpire(-753, 117);
+
+  // Add some emperors
+  const augustus = new RomanEmperor(
+    "Augustus",
+    EmperorDynasty.JulioClaudian,
+    { start: -27, end: 14 },
+    "Gaius Octavius"
+  );
+  augustus.addAchievement({
+    category: "political",
+    description: "Established the Principate",
+    year: -27,
+  });
+  augustus.addAchievement({
+    category: "cultural",
+    description: "Initiated the Augustan Golden Age",
+  });
+
+  const trajan = new RomanEmperor(
+    "Trajan",
+    EmperorDynasty.Nervan,
+    { start: 98, end: 117 }
+  );
+  trajan.addAchievement({
+    category: "military",
+    description: "Conquered Dacia and expanded empire to maximum extent",
+    year: 106,
+  });
+
+  empire.addEmperor(augustus);
+  empire.addEmperor(trajan);
+
+  // Add legions
+  const legioX = new RomanLegion("Fretensis", 10, "Fretensis", -41, "Judaea");
+  const legioIII = new RomanLegion("Augusta", 3, "Augusta", -43, "Africa");
+
+  empire.addLegion(legioX);
+  empire.addLegion(legioIII);
+
+  // Add provinces
+  const aegyptus = new RomanProvince(
+    "Aegyptus",
+    "Aegyptus",
+    "Alexandria",
+    ProvinceStatus.Imperial,
+    -30,
+    7500000
+  );
+
+  const britannia = new RomanProvince(
+    "Britannia",
+    "Britannia",
+    "Londinium",
+    ProvinceStatus.Imperial,
+    43,
+    2000000
+  );
+
+  empire.addProvince(aegyptus);
+  empire.addProvince(britannia);
+
+  // Generate and print report
+  console.log("\n" + empire.generateReport());
+
+  // Simulate a battle
+  console.log("\n" + "-".repeat(60));
+  console.log("BATTLE SIMULATION");
+  console.log("-".repeat(60));
+
+  const battleResult = BattleSimulator.simulateBattle(
+    [legioX, legioIII],
+    8000,
+    "plains"
+  );
+
+  console.log(`Result: ${battleResult.result.toUpperCase()}`);
+  console.log(`Roman casualties: ${battleResult.casualties.roman}`);
+  console.log(`Enemy casualties: ${battleResult.casualties.enemy}`);
+}
+
+// Run the demonstration
+main();
+
+export {
+  RomanEmperor,
+  RomanLegion,
+  RomanProvince,
+  RomanEmpire,
+  BattleSimulator,
+  EmperorDynasty,
+  MilitaryRank,
+  ProvinceStatus,
+};

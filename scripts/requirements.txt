@@ -1,0 +1,20 @@
+# Dependencies for the helper scripts in this directory.
+# Install everything with:  pip install -r scripts/requirements.txt
+#
+# convert_hf_to_tiktoken.py needs nothing beyond the standard library.
+
+# test_tokenizer.py, tiktoken_to_hf.py, vocab_viewer.py
+tiktoken>=0.5.0
+
+# tiktoken_to_hf.py
+transformers>=4.40.0
+
+# vocab_viewer.py
+textual>=0.40.0
+
+# convert_parquet_tree.py
+pyarrow>=14.0.0
+zstandard>=0.22.0
+
+# tiktoken_to_hf.py, convert_parquet_tree.py
+rich>=13.0.0

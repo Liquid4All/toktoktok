@@ -1,0 +1,43 @@
+# Warm start: extend an existing tokenizer instead of training from scratch.
+#
+#   ./target/release/toktoktok -c examples/warm_start.yaml
+#
+# The ranks in the warm-start file are loaded as-is and keep their token IDs, so text
+# already tokenized with it encodes identically. New merges are appended after them.
+#
+# Use this to grow a vocabulary for a new domain or language without invalidating an
+# already-trained model's embedding table.
+
+output: ./extended_tokenizer.tiktoken
+
+working_set_mb: 4096
+threads: -1
+verbose: true
+
+warm_start:
+  # An existing .tiktoken file — one this trainer produced, or one converted from a
+  # HuggingFace tokenizer with scripts/convert_hf_to_tiktoken.py.
+  file: ./tokenizer.tiktoken
+
+phases:
+  - name: "Extension"
+    merges: 4000
+    sources:
+      # Point this at your new-domain corpus. test_data/ is only a small sample —
+      # ask for many more merges than the corpus supports and training stops early
+      # with "No more valid pairs to merge".
+      - path: ./test_data
+
+# Special tokens are re-applied to the extended vocabulary, so list every token the
+# base tokenizer had plus any new ones — not just the additions.
+special_tokens:
+  - "<|pad|>"
+  - "<|startoftext|>"
+  - "<|endoftext|>"
+  - "<|im_start|>"
+  - "<|im_end|>"
+  - "<|fim_pre|>"
+  - "<|fim_mid|>"
+  - "<|fim_suf|>"
+  - "<think>"
+  - "</think>"
